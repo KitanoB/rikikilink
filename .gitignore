@@ -218,3 +218,8 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
+
+
+# Env Variables
+*.env
+
