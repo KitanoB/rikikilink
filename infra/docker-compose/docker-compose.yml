@@ -4,10 +4,10 @@ services:
 
   postgres:
     image: postgres:15
-    container_name: postgres
+    container_name: rikikilink-postgres
     restart: unless-stopped
     ports:
-      - "${POSTGRES_PORT}:5432"
+      - "${POSTGRES_PORT:-5432}:5432"
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
@@ -16,23 +16,45 @@ services:
       - pgdata:/var/lib/postgresql/data
     networks:
       - rikikilink-net
+    labels:
+      com.rikikilink.role: database
 
   redis:
     image: redis:7
-    container_name: redis
+    container_name: rikikilink-redis
     restart: unless-stopped
     ports:
-      - "${REDIS_PORT}:6379"
+      - "${REDIS_PORT:-6379}:6379"
     networks:
       - rikikilink-net
+    labels:
+      com.rikikilink.role: cache
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: rikikilink-pgadmin
+    restart: unless-stopped
+    ports:
+      - "${PGADMIN_PORT:-5050}:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+    depends_on:
+      - postgres
+    networks:
+      - rikikilink-net
+    labels:
+      com.rikikilink.role: devtool
 
   link-service:
     build:
-      context: ../../apps/link-service
-    container_name: link-service
-    depends_on: [postgres, redis]
+      context: ../../link-service
+    container_name: rikikilink-link-service
+    depends_on:
+      - postgres
+      - redis
     ports:
-      - "${LINK_SERVICE_PORT}:8080"
+      - "${LINK_SERVICE_PORT:-8081}:8080"
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
@@ -40,14 +62,18 @@ services:
       SPRING_REDIS_HOST: redis
     networks:
       - rikikilink-net
+    labels:
+      com.rikikilink.service: link
 
   stats-service:
     build:
-      context: ../../apps/stats-service
-    container_name: stats-service
-    depends_on: [redis, postgres]
+      context: ../../stat-service
+    container_name: rikikilink-stat-service
+    depends_on:
+      - postgres
+      - redis
     ports:
-      - "${STATS_SERVICE_PORT}:8080"
+      - "${STATS_SERVICE_PORT:-8082}:8080"
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
@@ -55,6 +81,8 @@ services:
       SPRING_REDIS_HOST: redis
     networks:
       - rikikilink-net
+    labels:
+      com.rikikilink.service: stat
 
 volumes:
   pgdata:
