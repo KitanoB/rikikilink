@@ -4,6 +4,8 @@
 
 RikikiLink est un raccourcisseur d’URL auto-hébergé, piloté par les événements et doté d’analyses en temps réel. Créez des liens courts personnalisés, partagez-les, et suivez leur performance depuis une interface moderne. Construit sur une architecture microservices, déployable via Docker/Kubernetes, RikikiLink reflète une conception backend robuste et une réelle aptitude à la production.
 
+Si vous voulez suivre l'avancement, mes prises de position, mes choix, mes erreurs =>  [RikikiBlog](https://kitanob.github.io/RikikiBlog)
+
 ### 🇬🇧 About RikikiLink
 
 RikikiLink is a self-hosted, event-driven URL shortener with real-time analytics. Easily create custom short links, share them, and monitor their performance through a modern web interface. Built with a microservice architecture and fully deployable via Docker/Kubernetes, RikikiLink demonstrates clean backend design and production readiness.
