@@ -60,6 +60,8 @@ services:
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
       SPRING_REDIS_HOST: redis
+    volumes:
+      - ./logs/link-service:/app/logs
     networks:
       - rikikilink-net
     labels:
@@ -79,6 +81,8 @@ services:
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
       SPRING_REDIS_HOST: redis
+    volumes:
+      - ./logs/stats-service:/app/logs
     networks:
       - rikikilink-net
     labels:
