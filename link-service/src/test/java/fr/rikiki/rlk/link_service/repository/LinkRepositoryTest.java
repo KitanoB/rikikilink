@@ -1,14 +1,12 @@
 package fr.rikiki.rlk.link_service.repository;
 
 import fr.rikiki.rlk.link_service.model.Link;
-import fr.rikiki.rlk.link_service.model.Link.LinkType;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
 import java.time.Instant;
 import java.util.Optional;
-import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
