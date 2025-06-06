@@ -1,7 +1,6 @@
 package fr.rikiki.rlk.link_service.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -45,5 +44,4 @@ public class Link {
         PERMANENT, TEMPORARY
     }
 
-    // Getters/setters/constructors...
 }
