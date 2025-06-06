@@ -2,10 +2,10 @@
 <configuration>
 
     <!-- Affiche les erreurs de config -->
-    <statusListener class="ch.qos.logback.core.status.OnConsoleStatusListener" />
+    <statusListener class="ch.qos.logback.core.status.OnConsoleStatusListener"/>
 
     <!-- Propriétés -->
-    <property name="LOG_DIR" value="/app/logs" />
+    <property name="LOG_DIR" value="/app/logs"/>
     <property name="LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"/>
 
     <!-- Console -->
