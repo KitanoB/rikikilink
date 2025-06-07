@@ -3,6 +3,14 @@ package fr.rikiki.rlk.link_service.util;
 import java.util.List;
 import java.util.Random;
 
+/**
+ * Générateur de codes courts de type "Leet-like".
+ * Combine un mot grec et un mot encourageant, suivi d'un suffixe leet.
+ *
+ * @author Kitano
+ * @version 1.0
+ * @since 1.0
+ */
 public class LeetLikeShortCodeGenerator implements ShortCodeGenerator {
 
     public static final List<Character> LEET_SUFFIXES = List.of('4', '3', '1', '0', '7');

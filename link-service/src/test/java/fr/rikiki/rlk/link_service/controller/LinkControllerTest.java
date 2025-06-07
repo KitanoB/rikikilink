@@ -68,6 +68,7 @@ class LinkControllerTest {
         validRequest.setTargetUrl("https://example.com/some-page");
     }
 
+
     @Test
     void whenValidRequest_andCodeDoesNotExist_thenReturn201AndSavedLink() throws Exception {
         when(shortcodeGenerator.generate()).thenReturn("TestCode1");
@@ -75,8 +76,8 @@ class LinkControllerTest {
 
         ArgumentCaptor<Link> captor = ArgumentCaptor.forClass(Link.class);
         when(linkRepository.save(captor.capture()))
-                .thenAnswer(invocation -> {
-                    Link l = invocation.getArgument(0);
+                .thenAnswer(inv -> {
+                    Link l = inv.getArgument(0);
                     l.setId(UUID.randomUUID());
                     return l;
                 });
@@ -85,11 +86,10 @@ class LinkControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(validRequest)))
                 .andExpect(status().isCreated())
+                .andExpect(header().string("Location", "/links/TestCode1"))
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.id").exists())
                 .andExpect(jsonPath("$.code").value("TestCode1"))
-                .andExpect(jsonPath("$.targetUrl").value(validRequest.getTargetUrl()))
-                .andExpect(jsonPath("$.active").value(true))
+                .andExpect(jsonPath("$.shortUrl").value("https://riki.li/TestCode1"))
                 .andExpect(jsonPath("$.createdAt").isNotEmpty());
 
         verify(shortcodeGenerator).generate();
@@ -97,17 +97,17 @@ class LinkControllerTest {
         verify(linkRepository).save(any(Link.class));
 
         Link saved = captor.getValue();
-        assertThat(saved.getCode()).isEqualTo("TestCode1");
         assertThat(saved.getTargetUrl()).isEqualTo(validRequest.getTargetUrl());
-        assertThat(saved.isActive()).isTrue();
         assertThat(saved.getCreatedAt())
                 .isCloseTo(Instant.now(), within(1, ChronoUnit.SECONDS));
+        assertThat(saved.isActive()).isTrue();
+        assertThat(saved.getCode()).isEqualTo("TestCode1");
     }
 
     @Test
     void whenGeneratedCodeAlreadyExists_thenTryAgainUntilUnique() throws Exception {
         when(shortcodeGenerator.generate())
-                .thenReturn("DupCode", "UniqueCode"); // <-- La logique du mock est correcte ici
+                .thenReturn("DupCode", "UniqueCode");
         when(linkRepository.findByCode("DupCode"))
                 .thenReturn(Optional.of(new Link()));
         when(linkRepository.findByCode("UniqueCode"))
@@ -115,8 +115,8 @@ class LinkControllerTest {
 
         ArgumentCaptor<Link> captor = ArgumentCaptor.forClass(Link.class);
         when(linkRepository.save(captor.capture()))
-                .thenAnswer(invocation -> {
-                    Link l = invocation.getArgument(0);
+                .thenAnswer(inv -> {
+                    Link l = inv.getArgument(0);
                     l.setId(UUID.randomUUID());
                     return l;
                 });
@@ -125,7 +125,7 @@ class LinkControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(validRequest)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.code").value("UniqueCode")); // <-- L'assertion est correcte ici
+                .andExpect(jsonPath("$.code").value("UniqueCode"));
 
         verify(shortcodeGenerator, times(2)).generate();
         verify(linkRepository).findByCode("DupCode");
