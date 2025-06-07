@@ -20,7 +20,7 @@ public class Link {
     @GeneratedValue
     private UUID id;
 
-    @Column(nullable = false, unique = true, length = 8)
+    @Column(nullable = false, unique = true, length = 50)
     private String code;
 
     @Column(nullable = false, length = 2048)
