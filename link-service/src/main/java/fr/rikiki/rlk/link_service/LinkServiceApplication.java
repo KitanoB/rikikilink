@@ -10,7 +10,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 @SpringBootApplication
 public class LinkServiceApplication {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(LinkServiceApplication.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(LinkServiceApplication.class);
 
     public static void main(String[] args) {
         SpringApplication.run(LinkServiceApplication.class, args);

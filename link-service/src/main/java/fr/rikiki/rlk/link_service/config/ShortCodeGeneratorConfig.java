@@ -15,7 +15,14 @@ import com.fasterxml.jackson.databind.JsonNode;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-
+/**
+ * Configuration class for the ShortCodeGenerator bean.
+ * Loads Greek words and encouraging words from JSON files.
+ *
+ * @author Kitano
+ * @version 1.0
+ * @since 1.0
+ */
 @Configuration
 public class ShortCodeGeneratorConfig {
 

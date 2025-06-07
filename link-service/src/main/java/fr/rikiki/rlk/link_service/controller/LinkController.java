@@ -1,47 +1,88 @@
 package fr.rikiki.rlk.link_service.controller;
 
 import fr.rikiki.rlk.link_service.dto.LinkCreateRequest;
+import fr.rikiki.rlk.link_service.dto.LinkResponse;
 import fr.rikiki.rlk.link_service.model.Link;
 import fr.rikiki.rlk.link_service.repository.LinkRepository;
 import fr.rikiki.rlk.link_service.util.ShortCodeGenerator;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import java.time.Instant;
+import java.net.URI;
 
+/**
+ * Controller for managing short links.
+ * Provides endpoints to create and retrieve short links.
+ *
+ * @author Kitano
+ * @version 1.0
+ * @since 1.0
+ */
 @RestController
 @RequestMapping("/links")
 public class LinkController {
 
-    private final LinkRepository linkRepository;
-    private final ShortCodeGenerator shortcodeGenerator;
+    private final LinkRepository repo;
+    private final ShortCodeGenerator gen;
+    private final String baseUrl = "https://riki.li";
 
-    @Autowired
-    public LinkController(LinkRepository linkRepository, ShortCodeGenerator shortcodeGenerator) {
-        this.linkRepository = linkRepository;
-        this.shortcodeGenerator = shortcodeGenerator;
+    public LinkController(LinkRepository repo, ShortCodeGenerator gen) {
+        this.repo = repo;
+        this.gen  = gen;
     }
 
     @PostMapping
-    public ResponseEntity<Link> createLink(@Valid @RequestBody LinkCreateRequest request) {
+    @Operation(summary = "Create a new short link")
+    @ApiResponse(responseCode = "201", description = "Link created successfully")
+    public ResponseEntity<LinkResponse> createLink(
+            @Valid @RequestBody LinkCreateRequest req
+    ) {
+
         Link link = new Link();
-        link.setTargetUrl(request.getTargetUrl());
-        link.setCreatedAt(Instant.now());
+        link.setTargetUrl(req.getTargetUrl());
+        link.setCreatedAt(java.time.Instant.now());
         link.setActive(true);
 
         String code;
         do {
-            code = shortcodeGenerator.generate();
-        } while (linkRepository.findByCode(code).isPresent());
+            code = gen.generate();
+        } while (repo.findByCode(code).isPresent());
         link.setCode(code);
 
-        Link saved = linkRepository.save(link);
-        return ResponseEntity.status(HttpStatus.CREATED).body(saved);
+        Link saved = repo.save(link);
+
+        String shortUrl = baseUrl + "/" + saved.getCode();
+        LinkResponse resp = new LinkResponse(
+                saved.getCode(),
+                shortUrl,
+                saved.getCreatedAt()
+        );
+
+        return ResponseEntity
+                .created(URI.create("/links/" + saved.getCode()))
+                .body(resp);
     }
+
+    @GetMapping("/{code}")
+    @Operation(summary = "Get a short link by code")
+    @ApiResponse(responseCode = "200", description = "Link found")
+    public ResponseEntity<LinkResponse> getLink(
+            @PathVariable String code
+    ) {
+        return repo.findByCode(code)
+                .map(link -> {
+                    String shortUrl = baseUrl + "/" + link.getCode();
+                    LinkResponse resp = new LinkResponse(
+                            link.getCode(),
+                            shortUrl,
+                            link.getCreatedAt()
+                    );
+                    return ResponseEntity.ok(resp);
+                })
+                .orElse(ResponseEntity.notFound().build());
+    }
+
 }
