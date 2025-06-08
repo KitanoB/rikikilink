@@ -2,7 +2,6 @@ package fr.rikiki.rlk.link_service.exception;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import java.util.List;
@@ -44,24 +43,67 @@ public final class ValidationError implements ApiError {
     private final List<FieldError> fieldErrors;
 
     /**
-     * Constructs a ValidationError with the specified status, message, path, and field errors.
+     * The error code that specifically identifies this validation error.
+     * Format: VAL_XXX
+     */
+    private final String errorCode;
+
+    /**
+     * Constructs a ValidationError with the specified status, message, path, field errors, and error code.
      *
      * @param status      The HTTP status code for the error (should be 400).
      * @param message     A message describing the validation error.
      * @param path        The path of the request that caused the validation error.
      * @param fieldErrors A list of field errors that occurred during validation.
+     * @param errorCode   The specific error code for this validation error.
      */
     @JsonCreator
     public ValidationError(
             @JsonProperty("status") int status,
             @JsonProperty("message") String message,
             @JsonProperty("path") String path,
-            @JsonProperty("fieldErrors") List<FieldError> fieldErrors
+            @JsonProperty("fieldErrors") List<FieldError> fieldErrors,
+            @JsonProperty("errorCode") String errorCode
     ) {
         this.status = status;
         this.message = message;
         this.path = path;
         this.fieldErrors = fieldErrors;
+        this.errorCode = errorCode != null ? errorCode : "VAL_001";
+    }
+
+    /**
+     * Constructs a ValidationError with the default status (400), specified message, path, and field errors.
+     *
+     * @param message     A message describing the validation error.
+     * @param path        The path of the request that caused the validation error.
+     * @param fieldErrors A list of field errors that occurred during validation.
+     * @param errorCode   The specific error code for this validation error.
+     */
+    public ValidationError(String message, String path, List<FieldError> fieldErrors, String errorCode) {
+        this(400, message, path, fieldErrors, errorCode);
+    }
+
+    /**
+     * Constructs a ValidationError with the default status (400), specified message, path, field errors,
+     * and default error code (VAL_001).
+     *
+     * @param message     A message describing the validation error.
+     * @param path        The path of the request that caused the validation error.
+     * @param fieldErrors A list of field errors that occurred during validation.
+     */
+    public ValidationError(String message, String path, List<FieldError> fieldErrors) {
+        this(400, message, path, fieldErrors, "VAL_001");
+    }
+
+    @Override
+    public String getErrorType() {
+        return "validation";
+    }
+
+    @Override
+    public String getErrorCode() {
+        return errorCode;
     }
 
     /**
@@ -76,4 +118,3 @@ public final class ValidationError implements ApiError {
             @JsonProperty("error") String error
     ) {}
 }
-

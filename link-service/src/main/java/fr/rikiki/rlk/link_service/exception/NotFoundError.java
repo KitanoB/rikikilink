@@ -2,7 +2,6 @@ package fr.rikiki.rlk.link_service.exception;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 
 /**
@@ -35,20 +34,61 @@ public final class NotFoundError implements ApiError {
     private final String path;
 
     /**
+     * The error code that specifically identifies this not found error.
+     * Format: NFD_XXX
+     */
+    private final String errorCode;
+
+    /**
      * Constructs a NotFoundError with the specified status, message, and path.
      *
-     * @param status  The HTTP status code for the error (should be 404).
-     * @param message A message describing the error.
-     * @param path    The path of the request that caused the error.
+     * @param status    The HTTP status code for the error (should be 404).
+     * @param message   A message describing the error.
+     * @param path      The path of the request that caused the error.
+     * @param errorCode The specific error code for this not found error.
      */
     @JsonCreator
     public NotFoundError(
             @JsonProperty("status") int status,
             @JsonProperty("message") String message,
-            @JsonProperty("path") String path
+            @JsonProperty("path") String path,
+            @JsonProperty("errorCode") String errorCode
     ) {
         this.status = status;
         this.message = message;
         this.path = path;
+        this.errorCode = errorCode != null ? errorCode : "NFD_001";
+    }
+
+    /**
+     * Constructs a NotFoundError with the default status (404), specified message, and path.
+     *
+     * @param message   A message describing the error.
+     * @param path      The path of the request that caused the error.
+     * @param errorCode The specific error code for this not found error.
+     */
+    public NotFoundError(String message, String path, String errorCode) {
+        this(404, message, path, errorCode);
+    }
+
+    /**
+     * Constructs a NotFoundError with the default status (404), specified message, path,
+     * and default error code (NFD_001).
+     *
+     * @param message A message describing the error.
+     * @param path    The path of the request that caused the error.
+     */
+    public NotFoundError(String message, String path) {
+        this(404, message, path, "NFD_001");
+    }
+
+    @Override
+    public String getErrorType() {
+        return "not_found";
+    }
+
+    @Override
+    public String getErrorCode() {
+        return errorCode;
     }
 }

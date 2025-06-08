@@ -2,55 +2,62 @@ package fr.rikiki.rlk.link_service.exception;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import lombok.AllArgsConstructor;
-import lombok.Data;
 
-import java.util.List;
 
 /**
  * Sealed interface for standardized API error responses.
- * This interface serves as a polymorphic base for different error types in the API,
- * utilizing JSON type information for proper serialization/deserialization.
  * <p>
- * Three implementations are permitted:
+ * Implementations:
  * <ul>
- *   <li>{@link ValidationError} - For 400 Bad Request errors with field validation details</li>
- *   <li>{@link NotFoundError} - For 404 Not Found errors</li>
- *   <li>{@link ServerError} - For 500 Internal Server errors</li>
+ *   <li>{@link ValidationError} – for 400 Bad Request validation failures</li>
+ *   <li>{@link NotFoundError} – for 404 Not Found errors</li>
+ *   <li>{@link ServerError}   – for 500 Internal Server errors</li>
  * </ul>
- *
- * @author Kitano
- * @version 1.0
- * @since 1.0
+ * <p>
+ * The JSON discriminator field is named "errorType".
  */
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "errorType")
+@JsonTypeInfo(
+        use = JsonTypeInfo.Id.NAME,
+        include = JsonTypeInfo.As.PROPERTY,
+        property = "errorType"
+)
 @JsonSubTypes({
         @JsonSubTypes.Type(value = ValidationError.class, name = "validation"),
         @JsonSubTypes.Type(value = NotFoundError.class,    name = "not_found"),
         @JsonSubTypes.Type(value = ServerError.class,      name = "server")
 })
-public sealed interface ApiError permits ValidationError, NotFoundError, ServerError {
+public sealed interface ApiError
+        permits ValidationError, NotFoundError, ServerError {
 
     /**
-     * Gets the HTTP status code for this error.
-     *
-     * @return the HTTP status code as an integer
+     * HTTP status code associated with this error (e.g. 400, 404, 500).
+     * @return the HTTP status code
      */
     int getStatus();
 
     /**
-     * Gets the error message describing what went wrong.
-     *
+     * Human-readable message describing the error.
      * @return the error message
      */
     String getMessage();
 
     /**
-     * Gets the request path that resulted in this error.
-     *
+     * The request path that triggered the error (for diagnostics).
      * @return the request path
      */
     String getPath();
+
+    /**
+     * Discriminator value for JSON serialization.
+     * Possible values: "validation", "not_found", "server".
+     * @return the error type
+     */
+    String getErrorType();
+
+    /**
+     * Specific error code for programmatic handling.
+     * Follows a pattern: VAL_XXX (validation), NFD_XXX (not found), SRV_XXX (server).
+     * @return the specific error code
+     */
+    String getErrorCode();
 }
-
-

@@ -9,6 +9,7 @@ import fr.rikiki.rlk.link_service.util.ShortCodeGenerator;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -27,6 +28,8 @@ import java.time.Instant;
 @RestController
 @RequestMapping("/links")
 public class LinkController {
+
+    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(LinkController.class);
 
     private final LinkRepository linkRepository;
     private final ShortCodeGenerator shortCodeGenerator;
@@ -53,6 +56,8 @@ public class LinkController {
         link.setTargetUrl(req.getTargetUrl());
         link.setCreatedAt(Instant.now());
         link.setActive(true);
+
+        LOGGER.info("Creating link for target URL: {}", req.getTargetUrl());
 
         String code = generateUniqueCode();
         link.setCode(code);
@@ -83,6 +88,7 @@ public class LinkController {
         do {
             code = shortCodeGenerator.generate();
         } while (linkRepository.findByCode(code).isPresent());
+        LOGGER.debug("Generated unique code: {}", code);
         return code;
     }
 
@@ -93,6 +99,7 @@ public class LinkController {
             @PathVariable String code
     ) {
 
+        LOGGER.info("Retrieving link for code: {}", code);
         // if the link with the given code does not exist, a LinkNotFoundException will be thrown.
         Link link = linkRepository.findByCode(code)
                 .orElseThrow(() -> new LinkNotFoundException(code));

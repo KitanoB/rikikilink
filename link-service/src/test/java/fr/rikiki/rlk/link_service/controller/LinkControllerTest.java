@@ -151,8 +151,9 @@ class LinkControllerTest {
                         .content("{}"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errorType").value("validation"))
+                // now expect the default field‐missing message
                 .andExpect(jsonPath("$.message")
-                        .value("Validation failed for request"))
+                        .value("Required field is missing"))
                 .andExpect(jsonPath("$.path").value("/links"))
                 .andExpect(jsonPath("$.status").value(400))
                 .andExpect(jsonPath("$.fieldErrors").isArray())
@@ -172,7 +173,9 @@ class LinkControllerTest {
                         .content(objectMapper.writeValueAsString(validRequest)))
                 .andExpect(status().isInternalServerError())
                 .andExpect(jsonPath("$.errorType").value("server"))
-                .andExpect(jsonPath("$.message").value("boom!"))
+                // now expect the generic server‐error message
+                .andExpect(jsonPath("$.message")
+                        .value("An unexpected error occurred"))
                 .andExpect(jsonPath("$.path").value("/links"))
                 .andExpect(jsonPath("$.status").value(500))
                 .andExpect(jsonPath("$.fieldErrors").doesNotExist());
