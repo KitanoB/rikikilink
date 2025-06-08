@@ -1,5 +1,6 @@
 package fr.rikiki.rlk.link_service.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
@@ -21,5 +22,6 @@ public class LinkCreateRequest {
             regexp = "https?://.+",
             message = "targetUrl must be a valid HTTP/HTTPS URL"
     )
+    @Schema(description="The URL to shorten", example="https://example.com/foo")
     private String targetUrl;
 }

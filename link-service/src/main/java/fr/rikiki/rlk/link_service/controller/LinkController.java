@@ -2,16 +2,19 @@ package fr.rikiki.rlk.link_service.controller;
 
 import fr.rikiki.rlk.link_service.dto.LinkCreateRequest;
 import fr.rikiki.rlk.link_service.dto.LinkResponse;
+import fr.rikiki.rlk.link_service.exception.LinkNotFoundException;
 import fr.rikiki.rlk.link_service.model.Link;
 import fr.rikiki.rlk.link_service.repository.LinkRepository;
 import fr.rikiki.rlk.link_service.util.ShortCodeGenerator;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.time.Instant;
 
 /**
  * Controller for managing short links.
@@ -25,13 +28,16 @@ import java.net.URI;
 @RequestMapping("/links")
 public class LinkController {
 
-    private final LinkRepository repo;
-    private final ShortCodeGenerator gen;
-    private final String baseUrl = "https://riki.li";
+    private final LinkRepository linkRepository;
+    private final ShortCodeGenerator shortCodeGenerator;
+    private final String baseUrl;
 
-    public LinkController(LinkRepository repo, ShortCodeGenerator gen) {
-        this.repo = repo;
-        this.gen  = gen;
+    public LinkController(LinkRepository linkRepository,
+                          ShortCodeGenerator shortCodeGenerator,
+                          @Value("${shortlink.base-url:https://riki.li}") String baseUrl) {
+        this.linkRepository = linkRepository;
+        this.shortCodeGenerator = shortCodeGenerator;
+        this.baseUrl = baseUrl;
     }
 
     @PostMapping
@@ -41,18 +47,17 @@ public class LinkController {
             @Valid @RequestBody LinkCreateRequest req
     ) {
 
+        // Validate the request body
+        // Link is the entity that represents the data model and that will be saved in the database.
         Link link = new Link();
         link.setTargetUrl(req.getTargetUrl());
-        link.setCreatedAt(java.time.Instant.now());
+        link.setCreatedAt(Instant.now());
         link.setActive(true);
 
-        String code;
-        do {
-            code = gen.generate();
-        } while (repo.findByCode(code).isPresent());
+        String code = generateUniqueCode();
         link.setCode(code);
 
-        Link saved = repo.save(link);
+        Link saved = linkRepository.save(link);
 
         String shortUrl = baseUrl + "/" + saved.getCode();
         LinkResponse resp = new LinkResponse(
@@ -66,23 +71,37 @@ public class LinkController {
                 .body(resp);
     }
 
+    /**
+     * Generates a unique short code for the link.
+     * Ensures that the generated code does not already exist in the repository.
+     *
+     * @return String a unique short code
+     */
+    private String generateUniqueCode() {
+        String code;
+
+        do {
+            code = shortCodeGenerator.generate();
+        } while (linkRepository.findByCode(code).isPresent());
+        return code;
+    }
+
     @GetMapping("/{code}")
     @Operation(summary = "Get a short link by code")
     @ApiResponse(responseCode = "200", description = "Link found")
-    public ResponseEntity<LinkResponse> getLink(
+    public LinkResponse getLink(
             @PathVariable String code
     ) {
-        return repo.findByCode(code)
-                .map(link -> {
-                    String shortUrl = baseUrl + "/" + link.getCode();
-                    LinkResponse resp = new LinkResponse(
-                            link.getCode(),
-                            shortUrl,
-                            link.getCreatedAt()
-                    );
-                    return ResponseEntity.ok(resp);
-                })
-                .orElse(ResponseEntity.notFound().build());
-    }
 
+        // if the link with the given code does not exist, a LinkNotFoundException will be thrown.
+        Link link = linkRepository.findByCode(code)
+                .orElseThrow(() -> new LinkNotFoundException(code));
+
+        String shortUrl = baseUrl + "/" + link.getCode();
+        return new LinkResponse(
+                link.getCode(),
+                shortUrl,
+                link.getCreatedAt()
+        );
+    }
 }

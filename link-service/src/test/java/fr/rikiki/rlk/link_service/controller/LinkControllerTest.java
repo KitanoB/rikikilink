@@ -28,6 +28,7 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.within;
 import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -52,6 +53,7 @@ class LinkControllerTest {
     @MockitoBean
     private ShortCodeGenerator shortcodeGenerator;
 
+    // deactivate JPA auditing beans auto-created
     @MockitoBean
     private JpaMetamodelMappingContext jpaMappingContext;
     @MockitoBean
@@ -67,7 +69,6 @@ class LinkControllerTest {
         validRequest = new LinkCreateRequest();
         validRequest.setTargetUrl("https://example.com/some-page");
     }
-
 
     @Test
     void whenValidRequest_andCodeDoesNotExist_thenReturn201AndSavedLink() throws Exception {
@@ -106,8 +107,7 @@ class LinkControllerTest {
 
     @Test
     void whenGeneratedCodeAlreadyExists_thenTryAgainUntilUnique() throws Exception {
-        when(shortcodeGenerator.generate())
-                .thenReturn("DupCode", "UniqueCode");
+        when(shortcodeGenerator.generate()).thenReturn("DupCode", "UniqueCode");
         when(linkRepository.findByCode("DupCode"))
                 .thenReturn(Optional.of(new Link()));
         when(linkRepository.findByCode("UniqueCode"))
@@ -142,6 +142,55 @@ class LinkControllerTest {
 
         verifyNoInteractions(shortcodeGenerator);
         verifyNoInteractions(linkRepository);
+    }
+
+    @Test
+    void whenMissingTargetUrl_thenValidationErrorPayload() throws Exception {
+        mockMvc.perform(post("/links")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errorType").value("validation"))
+                .andExpect(jsonPath("$.message")
+                        .value("Validation failed for request"))
+                .andExpect(jsonPath("$.path").value("/links"))
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.fieldErrors").isArray())
+                .andExpect(jsonPath("$.fieldErrors[0].field")
+                        .value("targetUrl"))
+                .andExpect(jsonPath("$.fieldErrors[0].error")
+                        .exists());
+    }
+
+    @Test
+    void whenGeneratorThrowsRuntime_thenInternalErrorPayload() throws Exception {
+        when(shortcodeGenerator.generate())
+                .thenThrow(new RuntimeException("boom!"));
+
+        mockMvc.perform(post("/links")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(validRequest)))
+                .andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$.errorType").value("server"))
+                .andExpect(jsonPath("$.message").value("boom!"))
+                .andExpect(jsonPath("$.path").value("/links"))
+                .andExpect(jsonPath("$.status").value(500))
+                .andExpect(jsonPath("$.fieldErrors").doesNotExist());
+    }
+
+    @Test
+    void whenLinkNotFound_thenNotFoundErrorPayload() throws Exception {
+        when(linkRepository.findByCode("nope"))
+                .thenReturn(Optional.empty());
+
+        mockMvc.perform(get("/links/nope"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.errorType").value("not_found"))
+                .andExpect(jsonPath("$.message")
+                        .value("Link not found: nope"))
+                .andExpect(jsonPath("$.path").value("/links/nope"))
+                .andExpect(jsonPath("$.status").value(404))
+                .andExpect(jsonPath("$.fieldErrors").doesNotExist());
     }
 
     @Test
