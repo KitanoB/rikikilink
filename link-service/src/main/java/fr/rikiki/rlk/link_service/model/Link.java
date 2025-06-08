@@ -8,6 +8,15 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import java.time.Instant;
 import java.util.UUID;
 
+/**
+ * Represents a shortened link in the system.
+ * Contains fields for the unique code, target URL, creation timestamp,
+ * active status, owner, and type of link (permanent or temporary).
+ *
+ * @author Kitano
+ * @version 1.0
+ * @since 1.0
+ */
 @Data
 @Entity
 @Table(name = "links", indexes = {
