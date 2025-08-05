@@ -129,7 +129,7 @@ RikikiLink is a self-hosted, event-driven URL shortener with real-time analytics
 
 ### 👤 Author / Auteur
 
-**Your Name** — [GitHub Profile](https://github.com/KitanoB)
+**KitanoB** — [GitHub Profile](https://github.com/KitanoB)
 
 ---
 
