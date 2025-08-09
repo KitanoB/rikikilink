@@ -1,0 +1,133 @@
+<!-- Overlay loading spinner -->
+@if (loading()) {
+  <div class="loading-overlay">
+    <mat-spinner diameter="80"></mat-spinner>
+  </div>
+}
+
+<!-- Header -->
+<header class="header">
+  <div class="container">
+    <div class="header-content"> 
+      <div class="logoBlock">
+        <img [src]="imagePath" class="logo-image" alt="RikikiLink Logo">
+        <h2 class="logo-title">RikikiLink</h2>
+      </div>
+      <nav class="nav-links">
+        <a href="#features">Features</a>
+        <a href="#pricing">Pricing</a>
+        <a href="#docs">Docs</a>
+      </nav>
+      <a href="#" class="cta-button">Get Started</a>
+    </div>
+  </div>
+</header>
+
+<!-- Hero Section -->
+<section class="hero">
+  <div class="container">
+    <h1>Raccourcissez vos liens.<br>Simplement.</h1>
+    <p>
+      RikikiLink est un raccourcisseur d'URL auto-hébergé, basé sur les événements avec des analyses en temps réel.
+      Créez des liens courts personnalisés et surveillez leurs performances.
+    </p>
+
+    <!-- URL Shortener Form -->
+    <div class="shortener-form">
+      <form [formGroup]="form" (ngSubmit)="submit()">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Collez votre lien ici</mat-label>
+          <input matInput formControlName="targetUrl" placeholder="https://exemple.com">
+          @if (form.get('targetUrl')?.hasError('required') && form.get('targetUrl')?.touched) {
+            <mat-error>L'URL est requise</mat-error>
+          }
+          @if (form.get('targetUrl')?.hasError('pattern') && form.get('targetUrl')?.touched) {
+            <mat-error>Veuillez entrer une URL valide</mat-error>
+          }
+        </mat-form-field>
+
+        <button
+          mat-raised-button
+          color="primary"
+          type="submit"
+          [disabled]="loading() || form.invalid"
+          class="shorten-btn"
+        >
+          @if (!loading()) {
+            <span>Raccourcir</span>
+          } @else {
+            <mat-spinner diameter="20"></mat-spinner>
+            <span class="ml-2">Raccourcissement...</span>
+          }
+        </button>
+      </form>
+
+      @if (shortLink()) {
+        <div class="result">
+          <p>✨ Lien créé :</p>
+          <mat-form-field appearance="fill" class="short-link-field">
+            <input matInput [value]="shortLink()" readonly>
+            <button
+              mat-icon-button
+              matSuffix
+              (click)="copy()"
+              aria-label="Copier"
+              class="copy-button"
+            >
+              <mat-icon>content_copy</mat-icon>
+            </button>
+          </mat-form-field>
+        </div>
+      }
+    </div>
+  </div>
+</section>
+
+<!-- Features Section -->
+<section class="features" id="features">
+  <div class="container">
+    <h2>Pourquoi choisir RikikiLink ?</h2>
+    <p class="features-subtitle">
+      Construit avec une technologie moderne et une architecture prête pour la production
+    </p>
+
+    <div class="features-grid">
+      @for (feature of features(); track feature.title) {
+        <div class="feature-card">
+          <div class="feature-icon">{{ feature.icon }}</div>
+          <h3>{{ feature.title }}</h3>
+          <p>{{ feature.description }}</p>
+        </div>
+      }
+    </div>
+  </div>
+</section>
+
+<!-- Stats Section -->
+<section class="stats">
+  <div class="container">
+    <div class="stats-grid">
+      @for (stat of stats(); track stat.label) {
+        <div class="stat-item">
+          <h3>{{ stat.value }}</h3>
+          <p>{{ stat.label }}</p>
+        </div>
+      }
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-section">
+      <h3>RikikiLink</h3>
+      <p>
+        Ce projet a un but uniquement educationnel.
+      </p>
+      </div>
+    <div class="footer-bottom">
+      <p>&copy; 2025 RikikiLink. Tous droits réservés.</p>
+    </div>
+  </div>
+</footer>
