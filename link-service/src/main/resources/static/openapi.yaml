@@ -1,0 +1,127 @@
+openapi: 3.0.1
+info:
+  title: RikikiLink API
+  version: 0.0.1
+servers:
+  - url: http://localhost:8180
+    description: Environ. dev
+  - url: https://api.rikiki.link
+    description: Prod
+
+paths:
+  /links:
+    post:
+      tags: [link-controller]
+      summary: Crée un nouveau lien court
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LinkCreateRequest'
+      responses:
+        '201':
+          description: Lien créé
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LinkResponse'
+        '400':
+          description: Requête invalide
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /links/{code}:
+    get:
+      tags: [link-controller]
+      summary: Récupère les détails d’un lien
+      parameters:
+        - $ref: '#/components/parameters/CodePathParam'
+      responses:
+        '200':
+          description: Lien trouvé
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LinkResponse'
+        '404':
+          description: Lien non trouvé ou inactif
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /r/{code}:
+    get:
+      tags: [redirect-controller]
+      summary: Redirige vers l’URL cible
+      parameters:
+        - $ref: '#/components/parameters/CodePathParam'
+      responses:
+        '302':
+          description: Redirection temporaire
+          headers:
+            Location:
+              description: URL de redirection
+              schema:
+                type: string
+        '404':
+          description: Lien non trouvé ou inactif
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '410':
+          description: Lien expiré
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  parameters:
+    CodePathParam:
+      name: code
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: "^[a-zA-Z0-9_-]+$"
+      description: Code unique du lien
+
+  schemas:
+    LinkCreateRequest:
+      type: object
+      required: [targetUrl]
+      properties:
+        targetUrl:
+          type: string
+          format: uri
+          pattern: "^https?://.+"
+    LinkResponse:
+      type: object
+      properties:
+        code:    { type: string }
+        shortUrl:{ type: string }
+        createdAt:
+          type: string
+          format: date-time
+
+    ErrorResponse:
+      type: object
+      properties:
+        timestamp: { type: string, format: date-time }
+        status:    { type: integer }
+        error:     { type: string }
+        message:   { type: string }
+        path:      { type: string }
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+security: []

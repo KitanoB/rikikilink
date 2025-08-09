@@ -13,11 +13,11 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.data.jpa.JpaRepositoriesAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.auditing.AuditingHandler;
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.Instant;
@@ -47,16 +47,16 @@ class LinkControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @MockitoBean
+    @MockBean
     private LinkRepository linkRepository;
 
-    @MockitoBean
+    @MockBean
     private ShortCodeGenerator shortcodeGenerator;
 
     // deactivate JPA auditing beans auto-created
-    @MockitoBean
+    @MockBean
     private JpaMetamodelMappingContext jpaMappingContext;
-    @MockitoBean
+    @MockBean
     private AuditingHandler jpaAuditingHandler;
 
     @Autowired
@@ -90,7 +90,7 @@ class LinkControllerTest {
                 .andExpect(header().string("Location", "/links/TestCode1"))
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.code").value("TestCode1"))
-                .andExpect(jsonPath("$.shortUrl").value("https://riki.li/TestCode1"))
+                .andExpect(jsonPath("$.shortUrl").value("https://rikiki.link/TestCode1"))
                 .andExpect(jsonPath("$.createdAt").isNotEmpty());
 
         verify(shortcodeGenerator).generate();

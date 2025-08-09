@@ -7,6 +7,11 @@ spring:
   logging:
     level:
       fr.rikiki.rlk: DEBUG
+      org.springdoc: DEBUG
+      io.swagger.v3: DEBUG
+      org.springframework.web: DEBUG
+    file:
+      name: logs/app.log
 
   datasource:
     url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/rikikilink}
@@ -27,7 +32,7 @@ spring:
     port: ${SPRING_REDIS_PORT:6379}
 
 server:
-  port: ${SERVER_PORT:8080}
+  port: 8080
 
 management:
   endpoints:
@@ -37,3 +42,11 @@ management:
   endpoint:
     health:
       show-details: always
+
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui/index.html
+    url: /openapi.yaml
