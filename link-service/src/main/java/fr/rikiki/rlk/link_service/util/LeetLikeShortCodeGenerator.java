@@ -24,9 +24,9 @@ public class LeetLikeShortCodeGenerator implements ShortCodeGenerator {
     public static final List<Character> LEET_SUFFIXES = List.of('4', '3', '1', '0', '7');
 
     /**
-     * Greek words (already filtered to 4–8 letters, a-z).
+     * French words (already filtered to 4–8 letters, a-z).
      */
-    private final List<String> greekWords;
+    private final List<String> frenchWords;
 
     /**
      * Encouraging words (same criteria: 4–8 letters, a-z).
@@ -40,24 +40,24 @@ public class LeetLikeShortCodeGenerator implements ShortCodeGenerator {
     private final Random random;
 
     /**
-     * @param greekWords       liste de mots grecs (déjà filtrés 4–8 lettres, a-z)
-     * @param encouragingWords liste de mots encourageants (mêmes critères)
-     * @param random           Random injecté (peut être seedé en test)
+     * @param frenchWords French words filtered to 4–8 letters, a-z
+     * @param encouragingWords encouraging words filtered to 4–8 letters, a-z
+     * @param random Random instance for generating random numbers.
      */
-    public LeetLikeShortCodeGenerator(List<String> greekWords,
+    public LeetLikeShortCodeGenerator(List<String> frenchWords,
                                       List<String> encouragingWords,
                                       Random random) {
-        if (greekWords.isEmpty() || encouragingWords.isEmpty()) {
+        if (frenchWords.isEmpty() || encouragingWords.isEmpty()) {
             throw new IllegalArgumentException("Need at least one word in each list");
         }
-        this.greekWords = List.copyOf(greekWords);
+        this.frenchWords = List.copyOf(frenchWords);
         this.encouragingWords = List.copyOf(encouragingWords);
         this.random = random == null ? new Random() : random;
     }
 
     @Override
     public synchronized String generate() {
-        String grec = capitalize(randomItem(greekWords));
+        String grec = capitalize(randomItem(frenchWords));
         String encour = capitalize(randomItem(encouragingWords));
         char suffix = LEET_SUFFIXES.get(random.nextInt(LEET_SUFFIXES.size()));
         String result =  grec + "-" + encour + suffix;
