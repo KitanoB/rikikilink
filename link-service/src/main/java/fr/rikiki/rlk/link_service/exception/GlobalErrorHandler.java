@@ -9,6 +9,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.List;
 
@@ -19,8 +21,7 @@ import java.util.List;
  * and converts them into our standardized ApiError payloads.
  * </p>
  */
-@ControllerAdvice
-public class GlobalErrorHandler {
+@ControllerAdvice(annotations = RestController.class)public class GlobalErrorHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GlobalErrorHandler.class);
 

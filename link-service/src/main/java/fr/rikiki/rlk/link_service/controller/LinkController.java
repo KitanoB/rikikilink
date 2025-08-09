@@ -37,7 +37,7 @@ public class LinkController {
 
     public LinkController(LinkRepository linkRepository,
                           ShortCodeGenerator shortCodeGenerator,
-                          @Value("${shortlink.base-url:https://riki.li}") String baseUrl) {
+                          @Value("${shortlink.base-url:https://rikiki.link}") String baseUrl) {
         this.linkRepository = linkRepository;
         this.shortCodeGenerator = shortCodeGenerator;
         this.baseUrl = baseUrl;
@@ -71,6 +71,7 @@ public class LinkController {
                 saved.getCreatedAt()
         );
 
+        LOGGER.info("Link created with code: {}, short URL: {}, at: {}", saved.getCode(), shortUrl, saved.getCreatedAt());
         return ResponseEntity
                 .created(URI.create("/links/" + saved.getCode()))
                 .body(resp);
@@ -88,7 +89,6 @@ public class LinkController {
         do {
             code = shortCodeGenerator.generate();
         } while (linkRepository.findByCode(code).isPresent());
-        LOGGER.debug("Generated unique code: {}", code);
         return code;
     }
 
@@ -100,11 +100,14 @@ public class LinkController {
     ) {
 
         LOGGER.info("Retrieving link for code: {}", code);
+
         // if the link with the given code does not exist, a LinkNotFoundException will be thrown.
         Link link = linkRepository.findByCode(code)
                 .orElseThrow(() -> new LinkNotFoundException(code));
 
         String shortUrl = baseUrl + "/" + link.getCode();
+
+        LOGGER.info("Link found: code={}, shortUrl={}, createdAt={}", link.getCode(), shortUrl, link.getCreatedAt());
         return new LinkResponse(
                 link.getCode(),
                 shortUrl,

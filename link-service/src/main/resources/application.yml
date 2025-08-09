@@ -7,6 +7,11 @@ spring:
   logging:
     level:
       fr.rikiki.rlk: DEBUG
+      org.springdoc: DEBUG
+      io.swagger.v3: DEBUG
+      org.springframework.web: DEBUG
+    file:
+      name: logs/app.log
 
   datasource:
     url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/rikikilink}
@@ -26,8 +31,14 @@ spring:
     host: ${SPRING_REDIS_HOST:localhost}
     port: ${SPRING_REDIS_PORT:6379}
 
+  mvc:
+    static-path-pattern: /**
+  web:
+    resources:
+      static-locations: classpath:/static/
+
 server:
-  port: ${SERVER_PORT:8080}
+  port: 8080   # <-- impératif : correspond au EXPOSE et au mapping Docker 8180:8080
 
 management:
   endpoints:
@@ -37,3 +48,11 @@ management:
   endpoint:
     health:
       show-details: always
+
+springdoc:
+  api-docs:
+    enabled: false    # on désactive la génération automatique /v3/api-docs
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui.html
+    url: /openapi.yaml  # charge votre fichier static/openapi.yaml

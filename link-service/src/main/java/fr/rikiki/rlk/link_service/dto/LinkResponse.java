@@ -1,5 +1,6 @@
 package fr.rikiki.rlk.link_service.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 
 import java.time.Instant;
@@ -14,8 +15,14 @@ import java.time.Instant;
  */
 @Getter
 public class LinkResponse {
+
+    @Schema(description = "The unique code for the shortened link", example = "abc123")
     private String code;
+
+    @Schema(description = "The full short URL", example = "https://rikiki.link/abc123")
     private String shortUrl;
+
+    @Schema(description = "The timestamp when the link was created", example = "2023-10-01T12:00:00Z")
     private Instant createdAt;
 
     public LinkResponse(String code, String shortUrl, Instant createdAt) {
