@@ -46,7 +46,7 @@ services:
     labels:
       com.rikikilink.role: devtool
 
-  link-service:
+  link-service:  
     build:
       context: ../../link-service
     container_name: rikikilink-link-service
